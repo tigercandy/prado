@@ -1,0 +1,9 @@
+# editor
+.fleet
+.vscode
+.idea
+
+# server
+prado
+storage/logs
+static/upload

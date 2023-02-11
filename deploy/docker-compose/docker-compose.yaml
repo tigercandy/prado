@@ -1,0 +1,57 @@
+version: "3"
+
+networks:
+  network:
+    ipam:
+      driver: default
+      config:
+        - subnet: '177.7.0.0/16'
+volumes:
+  mysql:
+
+services:
+  server:
+    build:
+      context: ../../
+      dockerfile: ./Dockerfile
+    container_name: prado_server
+    restart: always
+    ports:
+      - '8088:8088'
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    networks:
+      network:
+        ipv4_address: 177.7.0.12
+  web:
+    build:
+      context: ../../web
+      dockerfile: ./Dockerfile
+    container_name: prado_web
+    restart: always
+    ports:
+      - '8087:8087'
+    depends_on:
+      - server
+    command: [ 'nginx-debug', '-g', 'daemon off;' ]
+    networks:
+      network:
+        ipv4_address: 177.7.0.11
+  mysql:
+    image: mysql:5.7
+    container_name: prado_mysql
+    command: mysqld --character-set-server=utf8mb4 --collection-server=utf8nb4_unicode_ci
+    restart: always
+    ports:
+      - '13306:3306'
+    environment:
+      MYSQL_DATABASE: 'prado'
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: 'root'
+    volumes:
+      - mysql:/var/lib/mysql
+    networks:
+      network:
+        ipv4_address: 177.7.0.13
